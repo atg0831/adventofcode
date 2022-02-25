@@ -1,1 +1,1 @@
-# solution-adventofcod
+# solution-adventofcode
