@@ -8,27 +8,6 @@ import (
 	"strconv"
 )
 
-func decodeBinary(binaryBits string, start, end int) int {
-	bits, err := strconv.ParseInt(binaryBits[start:end], 2, 64)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return int(bits)
-}
-
-func splitSubPackets(binaryBits string, id int, index *int) int {
-	if id == 0 {
-		val := decodeBinary(binaryBits, *index, *index+15)
-		*index += 15
-		return val
-	} else {
-		numOfSubPackets := decodeBinary(binaryBits, *index, *index+11)
-		*index += 11
-		return numOfSubPackets
-	}
-}
-
 type subPacket struct {
 	val int
 }
@@ -117,6 +96,27 @@ func operator(totalSubPackets subPackets, packetType int) int {
 	}
 
 	return 0
+}
+
+func decodeBinary(binaryBits string, start, end int) int {
+	bits, err := strconv.ParseInt(binaryBits[start:end], 2, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return int(bits)
+}
+
+func splitSubPackets(binaryBits string, id int, index *int) int {
+	if id == 0 {
+		val := decodeBinary(binaryBits, *index, *index+15)
+		*index += 15
+		return val
+	} else {
+		numOfSubPackets := decodeBinary(binaryBits, *index, *index+11)
+		*index += 11
+		return numOfSubPackets
+	}
 }
 
 func splitPacket(binaryBits string, index *int) (int, int) {
