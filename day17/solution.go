@@ -32,63 +32,71 @@ func convertToInteger(str string) int {
 	result, _ := strconv.Atoi(str)
 	return result
 }
+
+func getMaxYVelocity(lowerboundY, upperboundY int) int {
+	if lowerboundY+upperboundY > 0 {
+		return upperboundY
+	}
+
+	return (-1 * lowerboundY) - 1
+}
+
+func sunOfOneToNum(x int) int {
+	return x * (x + 1) / 2
+}
+
+func inTargetRange(x, y, lowerboundX, upperboundX, lowerboundY, upperboundY int) bool {
+	return x >= lowerboundX && x <= upperboundX && y >= lowerboundY && y <= upperboundY
+}
+
+func outOfTargetRange(x, y, upperboundX, lowerboundY int) bool {
+	return x > upperboundX || y < lowerboundY
+}
+func solution1(lowerboundY, upperboundY int) {
+	answer := sunOfOneToNum(getMaxYVelocity(lowerboundY, upperboundY))
+	fmt.Println(answer)
+}
+
+func solution2(lowerboundX, upperboundX, lowerboundY, upperboundY int) {
+	answer := 0
+	for i := int(math.Sqrt(float64(lowerboundX))); i <= upperboundX; i++ {
+		for j := -getMaxYVelocity(lowerboundY, upperboundY) - 1; j < getMaxYVelocity(lowerboundY, upperboundY)+1; j++ {
+			xvelocity, yvelocity := i, j
+			xLoc, yLoc := 0, 0
+			for {
+				xLoc += xvelocity
+				yLoc += yvelocity
+
+				if outOfTargetRange(xLoc, yLoc, upperboundX, lowerboundY) {
+					break
+				}
+
+				if inTargetRange(xLoc, yLoc, lowerboundX, upperboundX, lowerboundY, upperboundY) {
+					answer += 1
+					break
+				}
+
+				yvelocity -= 1
+				if xvelocity > 0 {
+					xvelocity -= 1
+				} else if xvelocity < 0 {
+					xvelocity += 1
+				}
+			}
+		}
+	}
+	fmt.Println(answer)
+}
+
 func main() {
 	targetXRange, targetYRange := readInput()
 
 	lowerboundX := convertToInteger(targetXRange[0])
 	upperboundX := convertToInteger(targetXRange[1])
 
-	lowerboundY := convertToInteger(targetYRange[1])
-	upperboundY := convertToInteger(targetYRange[0])
-	// startX, startY := 0, 0
+	lowerboundY := convertToInteger(targetYRange[0])
+	upperboundY := convertToInteger(targetYRange[1])
 
-	answer := 0
-	for xvelocity := int(math.Sqrt(float64(2*upperboundX - 1))); xvelocity >= int(math.Sqrt(float64(2*lowerboundX-1))); xvelocity-- {
-		for yvelocity := xvelocity + 1 - upperboundY; yvelocity >= 1; yvelocity-- {
-			yLoc := 0
-
-			for k := 0; ; k++ {
-				yLoc += yvelocity - k
-				if yLoc <= lowerboundY && yLoc >= upperboundY {
-					answer = yvelocity * (yvelocity + 1) / 2
-					// answer = yLoc
-					fmt.Println(answer)
-					return
-				}
-
-				if yLoc < upperboundY {
-					break
-				}
-
-			}
-
-		}
-		// for k := 0; k < xvelocity; k++ {
-		// 	yvelocity +1
-		// 	for yvelocity := 1; yvelocity
-		// 	yvelocity := 1
-		// 	for {
-
-		// 	}
-		// 	yLoc := 0
-		// 	for yvelocity := 1; yvelocity-lowerboundY+1 < xvelocity; yvelocity++{
-		// 		yvelocity+1
-		// 	}
-		// 	if
-		// 	for 0-lowerboundY + yvelocity+1; 0-upperboundY + yvelocity+1
-
-		// }
-	}
-	fmt.Println(answer)
+	solution1(lowerboundY, upperboundY)
+	solution2(lowerboundX, upperboundX, lowerboundY, upperboundY)
 }
-
-func validOfXvelocity(x, lowerboundX int) bool {
-	maximumDistanceByX := x * (x + 1) / 2
-	if maximumDistanceByX < lowerboundX {
-		return false
-	}
-
-	return true
-}
-
-// func
