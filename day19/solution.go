@@ -7,8 +7,6 @@ import (
 	"math"
 	"os"
 	"strings"
-
-	mapset "github.com/deckarep/golang-set"
 )
 
 type scannerStack []int
@@ -139,19 +137,20 @@ func getRelativeScanner(pivotScanner, targetScanner scanner) (scanner, bool) {
 
 func solution() {
 	scanners := readInput()
-	beacons := mapset.NewSet()
 	visited := make([]bool, len(scanners))
 	scannerStack := scannerStack{}
 	scannerStack.push(0)
 	visited[0] = true
-
+	beacons := make(map[coordinates]bool)
 	for len(scannerStack) > 0 {
 		scannerIdx := scannerStack.pop()
 		pivotScanner := scanners[scannerIdx]
 
 		// 전체 beacon에 중복없이 add
 		for i := 0; i < len(pivotScanner.beacons); i++ {
-			beacons.Add(pivotScanner.beacons[i])
+			if !beacons[pivotScanner.beacons[i]] {
+				beacons[pivotScanner.beacons[i]] = true
+			}
 		}
 
 		for i, targetScanner := range scanners {
@@ -159,7 +158,6 @@ func solution() {
 				// 24방향의 rotation 경우 loop 돌면서 기준 beacon과의 거리만큼 이동시켜서 overlapped 되는 부분 있는지 파악
 				relativeScanner, ok := getRelativeScanner(pivotScanner, targetScanner)
 				if ok {
-					// log.Println(i, movedScanner)
 					scanners[i] = relativeScanner
 					scannerStack.push(i)
 					visited[i] = true
@@ -167,8 +165,8 @@ func solution() {
 			}
 		}
 	}
-	fmt.Println(beacons.Cardinality())
 
+	fmt.Println(len(beacons))
 	maximum := -int(math.MaxInt)
 	for i := 0; i < len(scanners); i++ {
 		for j := i + 1; j < len(scanners); j++ {
