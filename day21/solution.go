@@ -38,46 +38,116 @@ func readInput() (int, int) {
 	return startPosOfPlayer1, startPosOfPlayer2
 }
 
-func calculateAddition(curPos, totalScore, totalDiceNum int) (int, int) {
-	wrapBackTotalDiceNum := totalDiceNum % 10
-	if wrapBackTotalDiceNum == 0 {
-		wrapBackTotalDiceNum = 10
-	}
-	wrapBackSpace := (curPos + wrapBackTotalDiceNum) % 10
-	if wrapBackSpace == 0 {
-		wrapBackSpace = 10
-	}
-
-	curPos = (curPos + wrapBackTotalDiceNum) % 10
-	if curPos == 0 {
-		curPos = 10
-	}
-
-	totalScore = totalScore + wrapBackSpace
-	return totalScore, curPos
+type player struct {
+	pos   int
+	score int
 }
+
 func solution1() {
 	posOfPlayer1, posOfPlayer2 := readInput()
 
-	answer := 0
-	player1Score, player2Score := 0, 0
-	for i := 1; ; i += 6 {
-		player1Score, posOfPlayer1 = calculateAddition(posOfPlayer1, player1Score, 3*(i+1))
-		fmt.Println(player1Score, i, posOfPlayer1)
-		if player1Score >= endConditionScore {
-			answer = (i + 2) * player2Score
+	players := []player{{posOfPlayer1, 0}, {posOfPlayer2, 0}}
+	fmt.Println(players)
+
+	cnt, turn := 0, 0
+
+	for {
+		advanceSpace := 0
+		for i := 1; i <= 3; i++ {
+			advanceSpace += (cnt + i)
+			// diceNum = i
+		}
+		cnt += 3
+		players[turn].pos = caculateAdvance(players[turn].pos, advanceSpace)
+		players[turn].score += players[turn].pos
+
+		if players[turn].score >= endConditionScore {
+
+			fmt.Println(players[(turn+1)%2].score * cnt)
 			break
 		}
-		player2Score, posOfPlayer2 = calculateAddition(posOfPlayer2, player2Score, 3*(i+4))
-		fmt.Println(player2Score, i, posOfPlayer2)
-		if player2Score >= endConditionScore {
-			answer = (i + 2) * player1Score
-			break
+
+		turn = (turn + 1) % 2
+	}
+}
+
+func caculateAdvance(pos, advanceSpace int) int {
+	// advanceSpace = advanceSpace % 10
+	// if advanceSpace == 0 {
+	// 	advanceSpace = 10
+	// }
+
+	pos = (pos + advanceSpace) % 10
+	if pos == 0 {
+		pos = 10
+	}
+
+	return pos
+}
+
+func rollCases() map[int]int {
+	rolls := make(map[int]int)
+	for i := 1; i <= 3; i++ {
+		for j := 1; j <= 3; j++ {
+			for k := 1; k <= 3; k++ {
+				rolls[i+j+k] += 1
+			}
 		}
 	}
-	fmt.Println(answer)
+	fmt.Println(rolls)
+
+	return rolls
+}
+
+var rolls = rollCases()
+
+func calculateWhowin(players []player, p int) []int {
+
+	if players[0].score >= 21 {
+		return []int{1, 0}
+	}
+	if players[1].score >= 21 {
+		return []int{0, 1}
+	}
+
+	var universeCnt = []int{0, 0}
+	for k, v := range rolls {
+		prevPos := players[p].pos
+		prevScore := players[p].score
+		if p == 0 {
+			players[p].pos = caculateAdvance(players[p].pos, k)
+			players[p].score += players[p].pos
+			winner := calculateWhowin(players, 1)
+			universeCnt[0] += v * winner[0]
+			universeCnt[1] += v * winner[1]
+
+		} else {
+			players[p].pos = caculateAdvance(players[p].pos, k)
+			players[p].score += players[p].pos
+			winner := calculateWhowin(players, 0)
+			universeCnt[0] += v * winner[0]
+			universeCnt[1] += v * winner[1]
+		}
+
+		players[p].pos = prevPos
+		players[p].score = prevScore
+	}
+
+	return universeCnt
+}
+
+func solution2() {
+	posOfPlayer1, posOfPlayer2 := readInput()
+
+	universeCnt := calculateWhowin([]player{{posOfPlayer1, 0}, {posOfPlayer2, 0}}, 0)
+	if universeCnt[0] > universeCnt[1] {
+		fmt.Println(universeCnt[0])
+	} else {
+		fmt.Println(universeCnt[1])
+	}
 }
 
 func main() {
 	solution1()
+	solution2()
 }
